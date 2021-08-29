@@ -1,0 +1,433 @@
+\UseRawInputEncoding
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+
+%\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+
+
+%%% PAGE DIMENSIONS
+\usepackage{geometry}
+\geometry{a4paper} 
+
+\usepackage{graphicx} 
+
+% \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+
+\usepackage{setspace}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{multirow}
+\usepackage{changepage} 
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
+
+\usepackage{color}
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=L,
+  language=Python,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another...
+
+%%% HEADERS & FOOTERS
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+
+% wide page for side by side figures, tables, etc
+\newlength{\offsetpage}
+\setlength{\offsetpage}{1.0cm}
+\newenvironment{widepage}{\begin{adjustwidth}{-\offsetpage}{-\offsetpage}%
+    \addtolength{\textwidth}{2\offsetpage}}%
+{\end{adjustwidth}}
+
+%%% END Article customizations
+
+%%% The "real" document content comes below...
+
+\title{Solving the feature set problem with Genetic Programming}
+\author{Anja Miletic}
+%\date{} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed 
+
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\newpage
+
+\doublespacing
+\tableofcontents
+\singlespacing
+\newpage
+
+\pagenumbering{arabic}
+
+\section{Uvod}
+Problem biranja najmanjeg podskupa atributa (eng. Minimum feature subset selection problem) je bitan u istrazivanju podataka i masinskom ucenju. Kolicina podataka je sve veca, pa su tehnike ciscenja, odnosno smanjivanja obimnosti podataka vaznije. U slucaju najmanjeg podskupa atributa, cilj je smanjiti dimenzionalnost podataka bez gubljenja tacnosti klasifikacije, radi brzeg treniranja neuronskih mreza. 
+
+\section{Metode}
+Dati problem je NP tezak, i tesko ga je aproksimirati \cite{VanHorn}. Postoje razliciti pristupi resavanju problema. Nabrojimo neke \cite{Kira}:
+\begin{itemize}
+\item selekcija pojedinacnih atributa koristeci metrike koje se odnose na vaznost tih atributa. Naravno ova metoda je brza i deluje jednostavno, ali ne uzima u obzir odnos izmedju atributa, samim tim ne daje najbolje rezultate.
+\item potpuna pretraga prostora resenja. Od svih valjanih podskupova atributa izabrati onaj koji maksimizuje tacnost. Ova metoda je optimalna - od svih mogucih resenja ona ce dati najmanji podskup.  Zbog velikog broja mogucih resenja, potpuna pretraga se moze koristiti samo ako je ukupan broj atributa, odnosno ukupan broj mogucih podskupova mali
+\item heuristicke metode pretrage. Sequential Forward Selection (SFS) i Sequential Backward Selection (SBS) algoritmi koriste heuristiku: 'Najbolji atribut za dodavanje u svakom koraku je atribut koji treba izabrati'. Ova heuristika ne uzima obzir interakciju izmedju atributa.
+\item Relief algoritam. Baziran na tezinama atributa, algoritam prepoznaje one atribute koji su statisticki bitni, proucavajuci razlike izmedju vrednosti podataka. Algoritam je polinomijalne slozenosti.
+\end{itemize} 
+
+\section{Predlog resenja koriscenjem genetskog algoritma}
+Genetski algoritmi pripadaju porodici optimizacionih algoritama koji traze globalni minimum fitnes funkcije. U opstem slucaju, to ukljucuje cetiri koraka: \cite{Cui}
+\begin{itemize}
+\item evaluacija: bira se pseudo-slucajan set pocetne populacije. Izracunava se fitnes svake jedinke, zatim se one sortiraju na osnovu fitnesa.
+\item reprodukcija: biraju se najbolje jedinke koje se cuvaju u narednoj generaciji. Ove jedinke se zovu elitna deca.
+\item rekombinacija: biraju se jedinke koje ce se ukrstiti da bi se napravile jedinke za sledecu generaciju. U ovom koraku pokusavamo da sacuvamo najbolje gene i kombinujemo ih da napravimo jos bolje jedinke.
+\item mutacija: mali procenat populacije prolazi kroz mutaciju (izmenu dela koda). Ovaj korak je bitan da bi se izbeglo zaglavljivanje u lokalnom minimumu.
+\end{itemize}
+
+\subsection{Postavka resenja}
+Koristicemo genetski algoritam da nadjemo najmanji skup atributa sa najvecom preciznoscu. Jedinke ce biti kodirane binarnim nizom duzine \textit{m}, gde je \textit{m} ukupan broj atributa naseg seta podataka. Ako je na i-toj poziciji u nizu vrednost \lstinline{True}, onda u podskup atributa ulazi i-ti atribut. Fitnes jedinke predstavlja preciznost klasifikacije modela koji je ucen nad podacima koji sadrze podskup atributa predstavljen kodom jedinke. Koristicemo sekvencijalni model \lstinline{keras} biblioteke koji je optimizovan za probleme klasifikacije.
+\subsubsection{Podaci}
+Koristicemo podatke sa kosarkaskih utakmica NBA sezone 2020-21. Atributi se odnose na razne statisticke parametre koji se prate tokom utakmice, a zabelezeni su tokom prvog poluvremena. Klasifikikaciju radimo u odnosu na to da li je tim pobedio ili izgubio, pa zbog toga ne gledamo parametre sa kraja utakmice. Nakon ciscenja podataka ostaje nam 21 numericki atribut, kao i kolona \lstinline{W\\L} koju mapiramo kao \lstinline{W->1, L->0}. \newline
+
+\subsubsection{Algoritam}
+U nastavku sledi kod za odredjivanje fitnesa jedinke:
+
+\begin{lstlisting}
+def getModelAccuracy(featuresUsed, data):
+    # get array of True value indexes, eg [True, False, True] -> [0, 2]
+    remainingFeatures = [x for x in range(len(featuresUsed)) if featuresUsed[x]]
+    data_final = data.iloc[:, remainingFeatures]
+    
+    # create model
+    X_train, X_test, y_train, y_test = train_test_split(data_final__, results_final, test_size=0.33, random_state=7, stratify=results_final)
+    scaler = StandardScaler()
+    scaler.fit(X_train)
+    X_train = scaler.transform(X_train)
+    X_test = scaler.transform(X_test)
+    
+    model = Sequential()
+    model.add(Dense(input_dim=X_train.shape[1], units=500, activation='relu', kernel_constraint=unit_norm()))
+    model.add(Dropout(rate=0.2))
+    model.add(Dense(units=100, activation='relu', kernel_constraint=unit_norm()))
+    model.add(Dense(units=1, activation='sigmoid'))
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    
+    history = model.fit(X_train, y_train, batch_size=64, epochs=20, verbose=1, validation_split=0.3)
+    return history.history['val_accuracy'][-1]
+\end{lstlisting}
+
+Koristimo metriku \lstinline{val_accuracy}, tacnost klasifikacije validacionog skupa, da bismo izbegli slucajeve gde je \lstinline{accuracy = 100.0} zbog preprilagodjavanja.\newline
+Klasa \lstinline{Individual} sadrzi podatke o jedinki, kao i metode jedinke koje koristimo tokom algoritma:
+
+\begin{lstlisting}
+class Individual():
+    def __init__(self, numResources):
+        # code is a binary array where 0 represents the absence of a feature
+        self.code = [random.random() < 0.5 for _ in range(numResources)]
+        self.correctNonFeasible()
+        
+        self.fitness = self.calculateFitness()
+        
+    def __lt__(self, other):
+        if (self.fitness == other.fitness):
+            # the smaller the code, the better (less features)
+            return len([x for x in self.code if x]) < len([x for x in other.code if x])
+        
+        # a better individual has a higher accuracy
+        return self.fitness > other.fitness
+        
+    def invert(self):
+        i = random.randrange(len(self.code))
+        self.code[i] = not self.code[i]
+        if self.isFeasible():
+            return i
+        return -1
+    
+    def isFeasible(self):
+        for c in self.code:
+            if c:
+                return True
+        return False
+        
+    def correctNonFeasible(self):
+        for c in self.code:
+            if c:
+                return
+        # at least one feature must be present
+        index = random.randrange(0, len(self.code))
+        self.code[index] = True
+        
+    def calculateFitness(self):
+        return getModelAccuracy(self.code)
+\end{lstlisting}
+
+Ukoliko je fitnes dve jedinke isti, nama je vrednija ona sa manjim skupom atributa. Skup atributa ne sme da bude prazan, tako da u tom slucaju biramo nasumicno jedan atribut koji ce pripadati skupu.\newline
+Implementiracemo dve verzije genetskog algoritma - obican i algoritam sa simuliranim kaljenjem. Simulirano kaljenje je jos jedna tehnika koja omogucuje izlazak iz lokalnog minimuma, tako sto se prihvata gore resenje, sa verovatnocom obrnuto-proporcionalnom broju iteracija.\newline
+Pre njih, uvodimo pomocne funkcije selekcije, ukrstanja i mutacije:
+
+\begin{lstlisting}
+def selection(population):
+    TOURNAMENT_SIZE = 6
+    maxAccuracy = float('-inf')
+    bestIndex = -1
+    
+    for i in range(TOURNAMENT_SIZE):
+        index = random.randrange(len(population))
+        if population[index].fitness > maxAccuracy:
+            maxAccuracy = population[index].fitness
+            bestIndex = index
+    
+    return bestIndex
+    
+def crossover(parent1, parent2, child1, child2):
+    breakpoint = random.randrange(0, len(parent1.code))
+    
+    child1.code[:breakpoint] = parent1.code[:breakpoint]
+    child2.code[:breakpoint] = parent2.code[:breakpoint]
+    
+    child1.code[breakpoint:] = parent2.code[breakpoint:]
+    child2.code[breakpoint:] = parent1.code[breakpoint:]
+    
+    child1.correctNonFeasible()
+    child2.correctNonFeasible()
+    
+def mutation(individual):
+    MUTATION_PROB = 0.05
+    for i in range(len(individual.code)):
+        if random.random() < MUTATION_PROB:
+            individual.code[i] = not individual.code[i]
+            
+    individual.correctNonFeasible()
+\end{lstlisting}
+
+Koristicemo turnirsku selekciju i jednopoziciono ukrstanje. Slede definicije samog algortima:
+
+\begin{lstlisting}
+def genAlgWithoutSimulatedAnnealing():
+    POPULATION_SIZE = 20
+    numResources = data_final.shape[1]
+    population = [Individual(numResources) for i in range(POPULATION_SIZE)]
+    newPopulation = [Individual(numResources) for i in range(POPULATION_SIZE)]
+
+    ELITISM_SIZE = int(0.3 * POPULATION_SIZE)
+    MAX_ITER = 30
+    for i in range(MAX_ITER):
+        population.sort()
+        newPopulation[:ELITISM_SIZE] = population[:ELITISM_SIZE]
+        for j in range(ELITISM_SIZE, POPULATION_SIZE-1, 2):
+            parent1Index = selection(population)
+            parent2Index = selection(population)
+            
+            crossover(population[parent1Index], population[parent2Index], newPopulation[j], newPopulation[j+1])
+
+            mutation(newPopulation[j])
+            mutation(newPopulation[j+1])
+
+            newPopulation[j].fitness = newPopulation[j].calculateFitness()
+            newPopulation[j + 1].fitness = newPopulation[j + 1].calculateFitness()
+
+        population = newPopulation
+
+    bestIndividual = max(population, key=lambda x: x.fitness)
+    print('Solution: {}, fitness: {}'.format(bestIndividual.code, bestIndividual.fitness))
+    
+    
+def simulatedAnnealing(individual, iters):
+    for i in range(iters):
+        j = individual.invert()
+        if j < 0:
+            continue
+        newFitness = individual.calculateFitness()
+        
+        if newFitness > individual.fitness:
+            individual.fitness = newFitness
+        else:
+            p = 1.0 / (i + 1) ** 0.5
+            q = random.uniform(0, 1)
+            if p < q:
+                individual.fitness = newFitness
+            else:
+                individual.code[j] = not individual.code[j]
+                
+def genAlgSimulatedAnnealing():
+    POPULATION_SIZE = 20
+    numResources = data_final.shape[1]
+    population = [Individual(numResources) for i in range(POPULATION_SIZE)]
+    newPopulation = [Individual(numResources) for i in range(POPULATION_SIZE)]
+
+    ELITISM_SIZE = int(0.3 * POPULATION_SIZE)
+    MAX_ITER = 30
+    for i in range(MAX_ITER):
+        population.sort()
+        newPopulation[:ELITISM_SIZE] = population[:ELITISM_SIZE]
+        for j in range(ELITISM_SIZE, POPULATION_SIZE, 2):
+            parent1Index = selection(population)
+            parent2Index = selection(population)
+
+            crossover(population[parent1Index], population[parent2Index], newPopulation[j], newPopulation[j+1])
+
+            mutation(newPopulation[j])
+            mutation(newPopulation[j+1])
+
+            newPopulation[j].fitness = newPopulation[j].calculateFitness()
+            newPopulation[j + 1].fitness = newPopulation[j + 1].calculateFitness()
+
+
+        simulatedAnnealing(newPopulation[0], 10)
+        population = newPopulation
+
+    bestIndividual = max(population, key=lambda x: x.fitness)
+    print('Solution: {}, fitness: {}'.format(bestIndividual.code, bestIndividual.fitness))
+\end{lstlisting}
+
+\section{Rezultati}
+Uporedicemo resenja za malo \lstinline{n} koja daje genetski algoritam sa jednostavnim algoritmom grube sile. Algoritam za svako moguce resenje izracunava preciznost ucenja, sto znaci da je slozenost \( O(2^n) \), dok je slozenost genetskog algoritma polinomijalna, i zavisi od postavljenih parametara (broja generacija i velicine populacije).
+\newline\newline
+
+\begin{table}[h]
+\begin{widepage}
+\begin{tabular}{||c | c c c||} 
+ \hline
+ n & BruteForce & GenAlg & GenAlgSimulatedAnnealing \\ [0.5ex] 
+ \hline\hline
+
+  4 & 
+  \multirow{2}{5cm}{\centering [0, 0, 1, 1] 0.6505746841430664} &	
+  \multirow{2}{5cm}{\centering [0, 0, 1, 1] 0.6620689630508423} &	
+  \multirow{2}{4cm}{\centering [0, 0, 1, 1] 0.659770131111145} 
+  \\ \\ \hline
+ 5 & 
+ \multirow{2}{5cm}{\centering [1, 0, 1, 1, 0] 0.657471239566803} &	
+ \multirow{2}{5cm}{\centering [1, 1, 0, 1, 1], 0.6666666865348816} &	
+ \multirow{2}{5cm}{\centering [0, 0, 1, 1, 1], 0.6666666865348816} 
+ \\ \\ \hline
+ 6 & 
+ \multirow{2}{5cm}{\centering [1, 0, 1, 1, 0, 1] 0.6643677949905396} &	
+ \multirow{2}{5cm}{\centering [0, 0, 1, 1, 1, 0], 0.6666666865348816} &	
+ \multirow{2}{5cm}{\centering [1, 0, 1, 1, 0, 1], 0.659770131111145}
+ \\ \\ \hline
+ 7 & 
+ \multirow{2}{5cm}{\centering [0, 0, 1, 0, 1, 0, 1] 0.6666666865348816} &	
+ \multirow{2}{5cm}{\centering [0, 0, 1, 0, 1, 1, 0], 0.6643677949905396} &	
+ \multirow{2}{5cm}{\centering [1, 1, 0, 1, 0, 0, 1], 0.6643677949905396} 
+ \\ \\ \hline
+ 8 & 
+ \multirow{2}{5cm}{\centering [1, 1, 1, 1, 0, 0, 0, 1] 0.6735632419586182} &	
+ \multirow{2}{5cm}{\centering [1, 0, 1, 1, 0, 0, 1, 0], 0.6712643504142761} &	
+ \multirow{2}{5cm}{\centering [0, 1, 1, 1, 0, 0, 0, 1], 0.6689655184745789} 
+ \\ \\ \hline
+ 9 & 
+ \multirow{2}{5cm}{\centering [[1, 0, 1, 1, 0, 1, 0, 0, 0] 0.6712643504142761} &
+ \multirow{2}{5cm}{\centering [1, 1, 1, 1, 0, 1, 1, 0, 0], 0.6689655184745789} &	
+ \multirow{2}{5cm}{\centering [1, 0, 0, 1, 0, 1, 0, 1, 0], 0.6689655184745789}
+  \\ \\ \hline
+ 10 & 
+ \multirow{2}{5cm}{\centering [1, 1, 0, 1, 0, 0, 0, 1, 0, 1] 0.6804597973823547} &	
+ \multirow{2}{5cm}{\centering [1, 1, 0, 1, 0, 0, 0, 1, 0, 1], 0.6781609058380127} &	
+ \multirow{2}{5cm}{\centering [0, 0, 1, 1, 0, 0, 0, 0, 0, 1], 0.6666666865348816} 
+\\ \\[1ex] 
+ \hline
+\end{tabular}
+\caption{rezultati algoritama nad malim \lstinline{n}} 
+\end{widepage}
+\end{table}
+
+Treba uzeti u obzir da trenirani model za isti ulaz nece uvek vratiti isti izlaz. U slucajevima gde vise podskupova ima jako slicne performanse, ne znamo koji od njih ce nam algoritam vratiti. Da bismo se osigurali da dobijemo najmanji moguci podskup, mozemo da gledamo preciznost kao opseg, i fitnes racunamo uzimajuci velicinu skupa u obzir.
+	
+\newpage
+\section{Zakljucak}
+Ukoliko analiziramo same atribute, ne treba gledati vrednost pojedinacnih atributa, vec veze izmedju njih, odosno vrednost kombinacija atributa. \newline
+Mana predlozenog algoritma je u ceni racunanja fitnesa jedinke. Za svaku novu jedinku moramo da treniramo masinu sa novim podskupom atributa, da bismo ocenili tacnost klasifikacije nad tim podskupom. Vreme trajanja ove operacije nije zanemarljivo, i bilo bi bolje na drugi nacin oceniti fitnes. \newline
+Sad druge strane, genetski algoritam u razumljivo vreme daje rezultat koji moze da parira prilozenim rezultatima pohlepnog algoritma. Jedna varijacija algoritma bi mogla biti da ocena fitnesa jedinke bude kombinacija tacnosti klasifikacije i broja atributa, gde se prednost daje jedinkama sa manjim brojem atributa.
+%\begin{figure}[h!]
+%	\centering
+%		\includegraphics[width=0.8\textwidth]{classification_print}
+%		\caption{histogram cena i poena}
+%	\end{figure}
+%\begin{figure}[h!]
+%	\centering
+%		\includegraphics[width=0.8\textwidth]{conf_matrix_print}
+%	\end{figure}
+\newpage
+
+\newpage
+\begin{thebibliography}{9}
+
+\bibitem{VanHorn} K. Van Horn and T. Martinez, \emph{The Minimum Feature Set Problem},  Neural Networks 7 (1994), no. 3, pp. 491-494.
+\url{https://axon.cs.byu.edu/papers/vanhorn_3.pdf}.
+
+\bibitem{Kira} K.Kira, L.Randell, \emph{The Feature Selection Problem: Traditional Methods and a New Algorithm}, AAAI-92 Proc., 10th International Conference on Artificial Intelligence, 1992.
+
+\bibitem{Cui} M.Cui, S.Prasad, M.Mahrooghy, \emph{Genetic algorithms and Linear Discriminant Analysis based dimensionality reduction for remotely sensed image analysis},  2011 IEEE International Geoscience and Remote Sensing Symposium, available at 
+\url{https://www.researchgate.net/publication/220819539_Genetic_algorithms_and_Linear_Discriminant_Analysis_based_dimensionality_reduction_for_remotely_sensed_image_analysis}.
+
+\end{thebibliography}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

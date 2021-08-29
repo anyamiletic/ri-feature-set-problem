@@ -1,0 +1,9 @@
+\contentsline {section}{\numberline {1}Uvod}{1}{section.1}%
+\contentsline {section}{\numberline {2}Metode}{1}{section.2}%
+\contentsline {section}{\numberline {3}Predlog resenja koriscenjem genetskog algoritma}{1}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Postavka resenja}{2}{subsection.3.1}%
+\contentsline {subsubsection}{\numberline {3.1.1}Podaci}{2}{subsubsection.3.1.1}%
+\contentsline {subsubsection}{\numberline {3.1.2}Algoritam}{2}{subsubsection.3.1.2}%
+\contentsline {section}{\numberline {4}Rezultati}{6}{section.4}%
+\contentsline {section}{\numberline {5}Zakljucak}{7}{section.5}%
+\contentsline {section}{References}{8}{section*.3}%
