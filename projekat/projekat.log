@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2021) (preloaded format=pdflatex 2021.8.24)  29 AUG 2021 21:47
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2021) (preloaded format=pdflatex 2021.8.24)  29 AUG 2021 21:55
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -550,57 +550,44 @@ Underfull \hbox (badness 10000) in paragraph at lines 131--132
 
  []
 
-[2] [3] [4] [5]
-Underfull \hbox (badness 10000) in paragraph at lines 325--327
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 325--327
-
- []
-
-
-Overfull \hbox (16.58221pt too wide) in paragraph at lines 330--372
+[2] [3] [4] [5] [6]
+Overfull \hbox (16.58221pt too wide) in paragraph at lines 356--398
 [][] 
  []
 
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[6] [7]
-Underfull \hbox (badness 2443) in paragraph at lines 402--404
+[7] [8]
+Underfull \hbox (badness 2443) in paragraph at lines 428--430
 \OT1/cmr/m/it/10.95 Anal-y-sis based di-men-sion-al-ity re-duc-tion for re-mote
 ly sensed im-age anal-y-sis\OT1/cmr/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 1320) in paragraph at lines 402--404
+Underfull \hbox (badness 1320) in paragraph at lines 428--430
 \OT1/cmr/m/n/10.95 2011 IEEE In-ter-na-tional Geo-science and Re-mote Sens-ing 
 Sym-po-sium, avail-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 402--404
+Underfull \hbox (badness 10000) in paragraph at lines 428--430
 \OT1/cmr/m/n/10.95 able at [][]$\OT1/cmtt/m/n/10.95 https : / / www . researchg
 ate . net / publication / 220819539 _ Genetic _
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 402--404
+Underfull \hbox (badness 10000) in paragraph at lines 428--430
 \OT1/cmtt/m/n/10.95 algorithms _ and _ Linear _ Discriminant _ Analysis _ based
  _ dimensionality _
  []
 
-[8] (./projekat.aux)
+[9] (./projekat.aux)
 Package rerunfilecheck Info: File `projekat.out' has not changed.
 (rerunfilecheck)             Checksum: 1443FAD4C5CB501D9667060994606DF8;1045.
  ) 
 Here is how much of TeX's memory you used:
- 12306 strings out of 478994
- 188180 string characters out of 5858184
+ 12341 strings out of 478994
+ 188677 string characters out of 5858184
  724904 words of memory out of 5000000
- 29435 multiletter control sequences out of 15000+600000
+ 29444 multiletter control sequences out of 15000+600000
  411425 words of font info for 54 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  71i,12n,79p,607b,1863s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -615,10 +602,10 @@ al/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmss12.pfb></usr/loca
 l/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local
 /texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/
 texlive/2021/texmf-dist/fonts/type1/public/cm-super/sfrm1095.pfb>
-Output written on projekat.pdf (10 pages, 144574 bytes).
+Output written on projekat.pdf (11 pages, 146399 bytes).
 PDF statistics:
- 362 PDF objects out of 1000 (max. 8388607)
- 336 compressed objects within 4 object streams
- 195 named destinations out of 1000 (max. 500000)
+ 398 PDF objects out of 1000 (max. 8388607)
+ 371 compressed objects within 4 object streams
+ 221 named destinations out of 1000 (max. 500000)
  73 words of extra memory for PDF output out of 10000 (max. 10000000)
 

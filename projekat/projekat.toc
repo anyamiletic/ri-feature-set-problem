@@ -5,5 +5,5 @@
 \contentsline {subsubsection}{\numberline {3.1.1}Podaci}{2}{subsubsection.3.1.1}%
 \contentsline {subsubsection}{\numberline {3.1.2}Algoritam}{2}{subsubsection.3.1.2}%
 \contentsline {section}{\numberline {4}Rezultati}{6}{section.4}%
-\contentsline {section}{\numberline {5}Zakljucak}{7}{section.5}%
-\contentsline {section}{References}{8}{section*.3}%
+\contentsline {section}{\numberline {5}Zakljucak}{8}{section.5}%
+\contentsline {section}{References}{9}{section*.3}%
