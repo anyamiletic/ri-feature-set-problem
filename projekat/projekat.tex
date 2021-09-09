@@ -83,12 +83,17 @@
     \addtolength{\textwidth}{2\offsetpage}}%
 {\end{adjustwidth}}
 
+% use serbian latin letters
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[serbian]{babel}
+
 %%% END Article customizations
 
 %%% The "real" document content comes below...
 
-\title{Solving the feature set problem with Genetic Programming}
-\author{Anja Miletic}
+\title{Rešavanje problema skupa atributa uz pomoć genetskog algoritma}
+\author{Anja Miletić}
 %\date{} % Activate to display a given date or no date (if empty),
          % otherwise the current date is printed 
 
@@ -105,33 +110,33 @@
 \pagenumbering{arabic}
 
 \section{Uvod}
-Problem biranja najmanjeg podskupa atributa (eng. Minimum feature subset selection problem) je bitan u istrazivanju podataka i masinskom ucenju. Kolicina podataka je sve veca, pa su tehnike ciscenja, odnosno smanjivanja obimnosti podataka vaznije. U slucaju najmanjeg podskupa atributa, cilj je smanjiti dimenzionalnost podataka bez gubljenja tacnosti klasifikacije, radi brzeg treniranja neuronskih mreza. 
+Problem biranja najmanjeg podskupa atributa (eng. Minimum feature subset selection problem) je bitan u istraživanju podataka i mašinskom učenju. Količina podataka je sve veća, pa su tehnike čišćenja, odnosno smanjivanja obimnosti podataka važnije. U slučaju najmanjeg podskupa atributa, cilj je smanjiti dimenzionalnost podataka bez gubljenja tačnosti klasifikacije, radi bržeg treniranja neuronskih mreža. 
 
 \section{Metode}
-Dati problem je NP tezak, i tesko ga je aproksimirati \cite{VanHorn}. Postoje razliciti pristupi resavanju problema. Nabrojimo neke \cite{Kira}:
+Dati problem je NP težak, i teško ga je aproksimirati \cite{VanHorn}. Postoje različiti pristupi rešavanju problema. Nabrojimo neke \cite{Kira}:
 \begin{itemize}
-\item selekcija pojedinacnih atributa koristeci metrike koje se odnose na vaznost tih atributa. Naravno ova metoda je brza i deluje jednostavno, ali ne uzima u obzir odnos izmedju atributa, samim tim ne daje najbolje rezultate.
-\item potpuna pretraga prostora resenja. Od svih valjanih podskupova atributa izabrati onaj koji maksimizuje tacnost. Ova metoda je optimalna - od svih mogucih resenja ona ce dati najmanji podskup.  Zbog velikog broja mogucih resenja, potpuna pretraga se moze koristiti samo ako je ukupan broj atributa, odnosno ukupan broj mogucih podskupova mali
-\item heuristicke metode pretrage. Sequential Forward Selection (SFS) i Sequential Backward Selection (SBS) algoritmi koriste heuristiku: 'Najbolji atribut za dodavanje u svakom koraku je atribut koji treba izabrati'. Ova heuristika ne uzima obzir interakciju izmedju atributa.
-\item Relief algoritam. Baziran na tezinama atributa, algoritam prepoznaje one atribute koji su statisticki bitni, proucavajuci razlike izmedju vrednosti podataka. Algoritam je polinomijalne slozenosti.
+\item selekcija pojedinačnih atributa koristeći metrike koje se odnose na važnost tih atributa. Naravno ova metoda je brža i deluje jednostavno, ali ne uzima u obzir odnos između atributa, samim tim ne daje najbolje rezultate.
+\item potpuna pretraga prostora rešenja. Od svih valjanih podskupova atributa izabrati onaj koji maksimizuje tačnost. Ova metoda je optimalna - od svih mogućih rešenja ona će dati najmanji podskup.  Zbog velikog broja mogućih rešenja, potpuna pretraga se može koristiti samo ako je ukupan broj atributa, odnosno ukupan broj mogućih podskupova mali
+\item heurističke metode pretrage. Sequential Forward Selection (SFS) i Sequential Backward Selection (SBS) algoritmi koriste heuristiku: 'Najbolji atribut za dodavanje u svakom koraku je atribut koji treba izabrati'. Ova heuristika ne uzima obzir interakciju izmedju atributa.
+\item Relief algoritam. Baziran na težinama atributa, algoritam prepoznaje one atribute koji su statistički bitni, proučavajuci razlike izmedju vrednosti podataka. Algoritam je polinomijalne složenosti.
 \end{itemize} 
 
-\section{Predlog resenja koriscenjem genetskog algoritma}
-Genetski algoritmi pripadaju porodici optimizacionih algoritama koji traze globalni minimum fitnes funkcije. U opstem slucaju, to ukljucuje cetiri koraka: \cite{Cui}
+\section{Predlog rešenja korišćenjem genetskog algoritma}
+Genetski algoritmi pripadaju porodici optimizacionih algoritama koji traže globalni minimum fitnes funkcije. U opstem slučaju, to uključuje četiri koraka: \cite{Cui}
 \begin{itemize}
-\item evaluacija: bira se pseudo-slucajan set pocetne populacije. Izracunava se fitnes svake jedinke, zatim se one sortiraju na osnovu fitnesa.
-\item reprodukcija: biraju se najbolje jedinke koje se cuvaju u narednoj generaciji. Ove jedinke se zovu elitna deca.
-\item rekombinacija: biraju se jedinke koje ce se ukrstiti da bi se napravile jedinke za sledecu generaciju. U ovom koraku pokusavamo da sacuvamo najbolje gene i kombinujemo ih da napravimo jos bolje jedinke.
+\item evaluacija: bira se pseudo-slučajan set početne populacije. Izračunava se fitnes svake jedinke, zatim se one sortiraju na osnovu fitnesa.
+\item reprodukcija: biraju se najbolje jedinke koje se čuvaju u narednoj generaciji. Ove jedinke se zovu elitna deca.
+\item rekombinacija: biraju se jedinke koje će se ukrstiti da bi se napravile jedinke za sledeću generaciju. U ovom koraku pokušavamo da sačuvamo najbolje gene i kombinujemo ih da napravimo još bolje jedinke.
 \item mutacija: mali procenat populacije prolazi kroz mutaciju (izmenu dela koda). Ovaj korak je bitan da bi se izbeglo zaglavljivanje u lokalnom minimumu.
 \end{itemize}
 
-\subsection{Postavka resenja}
-Koristicemo genetski algoritam da nadjemo najmanji skup atributa sa najvecom preciznoscu. Jedinke ce biti kodirane binarnim nizom duzine \textit{m}, gde je \textit{m} ukupan broj atributa naseg seta podataka. Ako je na i-toj poziciji u nizu vrednost \lstinline{True}, onda u podskup atributa ulazi i-ti atribut. Fitnes jedinke predstavlja preciznost klasifikacije modela koji je ucen nad podacima koji sadrze podskup atributa predstavljen kodom jedinke. Koristicemo sekvencijalni model \lstinline{keras} biblioteke koji je optimizovan za probleme klasifikacije.
+\subsection{Postavka rešenja}
+Koristićemo genetski algoritam da nađemo najmanji skup atributa sa najvećom preciznošću. Jedinke će biti kodirane binarnim nizom dužine \textit{m}, gde je \textit{m} ukupan broj atributa našeg seta podataka. Ako je na i-toj poziciji u nizu vrednost \lstinline{True}, onda u podskup atributa ulazi i-ti atribut. Fitnes jedinke predstavlja preciznost klasifikacije modela koji je učen nad podacima koji sadrze podskup atributa predstavljen kodom jedinke. Koristićemo sekvencijalni model \lstinline{keras} biblioteke koji je optimizovan za probleme klasifikacije.
 \subsubsection{Podaci}
-Koristicemo podatke sa kosarkaskih utakmica NBA sezone 2020-21. Atributi se odnose na razne statisticke parametre koji se prate tokom utakmice, a zabelezeni su tokom prvog poluvremena. Klasifikikaciju radimo u odnosu na to da li je tim pobedio ili izgubio, pa zbog toga ne gledamo parametre sa kraja utakmice. Nakon ciscenja podataka ostaje nam 21 numericki atribut, kao i kolona \lstinline{W\\L} koju mapiramo kao \lstinline{W->1, L->0}. \newline
+Koristićemo podatke sa košarkaskih utakmica NBA sezone 2020-21. Atributi se odnose na razne statističke parametre koji se prate tokom utakmice, a zabeleženi su tokom prvog poluvremena. Klasifikikaciju radimo u odnosu na to da li je tim pobedio ili izgubio, pa zbog toga ne gledamo parametre sa kraja utakmice. Nakon čišćenja podataka ostaje nam 21 numerički atribut, kao i kolona \lstinline{W\\L} koju mapiramo kao \lstinline{W->1, L->0}. \newline
 
 \subsubsection{Algoritam}
-U nastavku sledi kod za odredjivanje fitnesa jedinke:
+U nastavku sledi kod za određivanje fitnesa jedinke:
 
 \begin{lstlisting}
 def getModelAccuracy(featuresUsed, data):
@@ -157,8 +162,8 @@ def getModelAccuracy(featuresUsed, data):
     return history.history['val_accuracy'][-1]
 \end{lstlisting}
 
-Koristimo metriku \lstinline{val_accuracy}, tacnost klasifikacije validacionog skupa, da bismo izbegli slucajeve gde je \lstinline{accuracy = 100.0} zbog preprilagodjavanja.\newline
-Klasa \lstinline{Individual} sadrzi podatke o jedinki, kao i metode jedinke koje koristimo tokom algoritma:
+Koristimo metriku \lstinline{val_accuracy}, tačnost klasifikacije validacionog skupa, da bismo izbegli slučajeve gde je \lstinline{accuracy = 100.0} zbog preprilagođavanja.\newline
+Klasa \lstinline{Individual} sadrži podatke o jedinki, kao i metode jedinke koje koristimo tokom algoritma:
 
 \begin{lstlisting}
 class Individual():
@@ -202,9 +207,8 @@ class Individual():
         return getModelAccuracy(self.code)
 \end{lstlisting}
 
-Ukoliko je fitnes dve jedinke isti, nama je vrednija ona sa manjim skupom atributa. Skup atributa ne sme da bude prazan, tako da u tom slucaju biramo nasumicno jedan atribut koji ce pripadati skupu.\newline
-Implementiracemo dve verzije genetskog algoritma - obican i algoritam sa simuliranim kaljenjem. Simulirano kaljenje je jos jedna tehnika koja omogucuje izlazak iz lokalnog minimuma, tako sto se prihvata gore resenje, sa verovatnocom obrnuto-proporcionalnom broju iteracija.\newline
-Pre njih, uvodimo pomocne funkcije selekcije, ukrstanja i mutacije:
+Ukoliko je fitnes dve jedinke isti, nama je vrednija ona sa manjim skupom atributa. Skup atributa ne sme da bude prazan, tako da u tom slučaju biramo nasumično jedan atribut koji će pripadati skupu.\newline
+Uvodimo pomoćne funkcije selekcije, ukrštanja i mutacije:
 
 \begin{lstlisting}
 def selection(population):
@@ -241,7 +245,7 @@ def mutation(individual):
     individual.correctNonFeasible()
 \end{lstlisting}
 
-Koristicemo turnirsku selekciju i jednopoziciono ukrstanje. Slede definicije samog algortima:
+Koristićemo turnirsku selekciju i jednopoziciono ukrštanje. Slede definicije samog algortima:
 
 \begin{lstlisting}
 def genAlgWithoutSimulatedAnnealing():
@@ -272,6 +276,14 @@ def genAlgWithoutSimulatedAnnealing():
     bestIndividual = max(population, key=lambda x: x.fitness)
     print('Solution: {}, fitness: {}'.format(bestIndividual.code, bestIndividual.fitness))
     
+\end{lstlisting}
+
+\subsection{Varijacije}
+\subsubsection{Simulirano kaljenje}
+
+Pored običnog algoritma implementiraćemo i algoritam sa simuliranim kaljenjem. Simulirano kaljenje je još jedna tehnika koja omogućuje izlazak iz lokalnog minimuma, tako što se prihvata gore rešenje, sa verovatnoćom obrnuto-proporcionalnom broju iteracija.
+
+\begin{lstlisting}
     
 def simulatedAnnealing(individual, iters):
     for i in range(iters):
@@ -321,8 +333,23 @@ def genAlgSimulatedAnnealing():
     print('Solution: {}, fitness: {}'.format(bestIndividual.code, bestIndividual.fitness))
 \end{lstlisting}
 
+\subsubsection{Fitnes funkcija}
+Ono što se javlja kao problem u oba navedena algoritma je što fitnes funkcija isključivo zavisi od preciznosti modela. Može da se desi da model koji ima malo bolju preciznost sadrži mnogo više atributa, ali je klasifikovan kao bolji. Zbog toga uvodimo i broj atributa u računanje fitnes funkcije. Koristeći \lstinline{StandardScaler} možemo da kvantifikujemo ove vrednosti - jako male i jako velike vrednosti će dovoljno uticati na fitnes, tako da dajemo veću prednost jedinkama sa manjim brojem atributa. Sledi nova funkcija za izračunavanje fitnesa:
+\begin{lstlisting}
+def calculateFitness(code, accuracy):
+    scaler = StandardScaler()
+    max_attributes = len(code)
+    num_attributes = len([x for x in code if x])
+    arr = np.array([1.0, num_attributes, max_attributes]).reshape(-1, 1)
+    scaler.fit(arr)
+    arr = scaler.transform(arr)
+    [_, penalty, _] = scaler.fit_transform(X=arr)
+    return accuracy - penalty
+\end{lstlisting}
+
 \section{Rezultati}
-Uporedicemo resenja za malo \lstinline{n} koja daje genetski algoritam sa jednostavnim algoritmom grube sile. Algoritam za svako moguce resenje izracunava preciznost ucenja, sto znaci da je slozenost \( O(2^n) \), dok je slozenost genetskog algoritma polinomijalna, i zavisi od postavljenih parametara (broja generacija i velicine populacije). Sledi kod algoritma grube sile:
+Uporedićemo rešenja za malo \lstinline{n} koja daje genetski algoritam sa jednostavnim algoritmom grube sile. Algoritam za svako moguće rešenje izračunava preciznost učenja, što znači da je složenost \( O(2^n) \), dok je složenost genetskog algoritma polinomijalna, i zavisi od postavljenih parametara (broja generacija i velicine populacije). U slučaju predstavljenih algoritama, eksperimentalnom metodom došlo se do \lstinline{POPULATION_SIZE = 20} i \lstinline{MAX_ITER = 20} vrednosti. Veličina populacije treba da bude dovoljno velika da generiše dovoljno raznovrsne jedinke. Za broj iteracija je utvrđeno da je najmanji koji daje tačan, odnosno dovoljno dobar rezultat. Prikazaćemo vreme izvršavanja algoritma za svako \lstinline{n} , kao i vreme izvršavanja \lstinline{calculateFitness} funkcije za različito \lstinline{n}.
+\newline Sledi kod algoritma grube sile:
 
 \begin{lstlisting}
 import itertools
@@ -359,53 +386,95 @@ def bruteForceAlg(n):
  \hline\hline
 
   4 & 
-  \multirow{2}{5cm}{\centering [0, 0, 1, 1] 0.6505746841430664} &	
-  \multirow{2}{5cm}{\centering [0, 0, 1, 1] 0.6620689630508423} &	
-  \multirow{2}{4cm}{\centering [0, 0, 1, 1] 0.659770131111145} 
-  \\ \\ \hline
+  \multirow{3}{4.0cm}{\centering [0, 0, 1, 1] 0.6505746841430664 25.2s} &	
+  \multirow{3}{4.0cm}{\centering [0, 0, 1, 1] 0.6620689630508423 2min 42s} &	
+  \multirow{3}{4.0cm}{\centering [0, 0, 1, 1] 0.659770131111145 7min 18s} 
+  \\ \\ \\ \hline
  5 & 
- \multirow{2}{5cm}{\centering [1, 0, 1, 1, 0] 0.657471239566803} &	
- \multirow{2}{5cm}{\centering [1, 1, 0, 1, 1], 0.6666666865348816} &	
- \multirow{2}{5cm}{\centering [0, 0, 1, 1, 1], 0.6666666865348816} 
- \\ \\ \hline
+ \multirow{3}{4.0cm}{\centering [1, 0, 1, 1, 0] 0.657471239566803 42.8s} &	
+ \multirow{3}{4.0cm}{\centering [1, 1, 0, 1, 1], 0.6666666865348816 2min 33s} &	
+ \multirow{3}{4.0cm}{\centering [0, 0, 1, 1, 1], 0.6666666865348816 7min 29s} 
+ \\ \\ \\ \hline
  6 & 
- \multirow{2}{5cm}{\centering [1, 0, 1, 1, 0, 1] 0.6643677949905396} &	
- \multirow{2}{5cm}{\centering [0, 0, 1, 1, 1, 0], 0.6666666865348816} &	
- \multirow{2}{5cm}{\centering [1, 0, 1, 1, 0, 1], 0.659770131111145}
- \\ \\ \hline
+ \multirow{3}{4.0cm}{\centering [1, 0, 1, 1, 0, 1] 0.6643677949905396 1min27s} &	
+ \multirow{3}{4.0cm}{\centering [0, 0, 1, 1, 1, 0], 0.6666666865348816 2min 26s} &	
+ \multirow{3}{4.0cm}{\centering [1, 0, 1, 1, 0, 1], 0.659770131111145 7min 27s}
+ \\ \\ \\ \hline
  7 & 
- \multirow{2}{5cm}{\centering [0, 0, 1, 0, 1, 0, 1] 0.6666666865348816} &	
- \multirow{2}{5cm}{\centering [0, 0, 1, 0, 1, 1, 0], 0.6643677949905396} &	
- \multirow{2}{5cm}{\centering [1, 1, 0, 1, 0, 0, 1], 0.6643677949905396} 
- \\ \\ \hline
+ \multirow{3}{4.0cm}{\centering [0, 0, 1, 0, 1, 0, 1] 0.6666666865348816 3min4s} &	
+ \multirow{3}{4.0cm}{\centering [0, 0, 1, 0, 1, 1, 0], 0.6643677949905396 2min 30s} &	
+ \multirow{3}{4.0cm}{\centering [1, 1, 0, 1, 0, 0, 1], 0.6643677949905396 7min 25s} 
+ \\ \\ \\ \hline
  8 & 
- \multirow{2}{5cm}{\centering [1, 1, 1, 1, 0, 0, 0, 1] 0.6735632419586182} &	
- \multirow{2}{5cm}{\centering [1, 0, 1, 1, 0, 0, 1, 0], 0.6712643504142761} &	
- \multirow{2}{5cm}{\centering [0, 1, 1, 1, 0, 0, 0, 1], 0.6689655184745789} 
- \\ \\ \hline
+ \multirow{3}{4.0cm}{\centering [1, 1, 1, 1, 0, 0, 0, 1] 0.6735632419586182 5min21s} &	
+ \multirow{3}{4.0cm}{\centering [1, 0, 1, 1, 0, 0, 1, 0], 0.6712643504142761 2min 35s} &	
+ \multirow{3}{4.0cm}{\centering [0, 1, 1, 1, 0, 0, 0, 1], 0.6689655184745789 7min 32s} 
+ \\ \\ \\ \hline
  9 & 
- \multirow{2}{5cm}{\centering [[1, 0, 1, 1, 0, 1, 0, 0, 0] 0.6712643504142761} &
- \multirow{2}{5cm}{\centering [1, 1, 1, 1, 0, 1, 1, 0, 0], 0.6689655184745789} &	
- \multirow{2}{5cm}{\centering [1, 0, 0, 1, 0, 1, 0, 1, 0], 0.6689655184745789}
-  \\ \\ \hline
+ \multirow{3}{4.0cm}{\centering [1, 0, 1, 1, 0, 1, 0, 0, 0] 0.6712643504142761 12min 15s} &
+ \multirow{3}{4.0cm}{\centering [1, 1, 1, 1, 0, 1, 1, 0, 0], 0.6689655184745789 2min 33s} &	
+ \multirow{3}{4.0cm}{\centering [1, 0, 0, 1, 0, 1, 0, 1, 0], 0.6689655184745789 7min 24s}
+  \\ \\ \\ \hline
  10 & 
- \multirow{2}{5cm}{\centering [1, 1, 0, 1, 0, 0, 0, 1, 0, 1] 0.6804597973823547} &	
- \multirow{2}{5cm}{\centering [1, 1, 0, 1, 0, 0, 0, 1, 0, 1], 0.6781609058380127} &	
- \multirow{2}{5cm}{\centering [0, 0, 1, 1, 0, 0, 0, 0, 0, 1], 0.6666666865348816} 
-\\ \\[1ex] 
+ \multirow{3}{4.3cm}{\centering [1, 1, 0, 1, 0, 0, 0, 1, 0, 1] 0.6804597973823547 24min 1s} &	
+ \multirow{3}{4.3cm}{\centering [1, 1, 0, 1, 0, 0, 0, 1, 0, 1], 0.6781609058380127 2min 40s} &	
+ \multirow{3}{4.3cm}{\centering [0, 0, 1, 1, 0, 0, 0, 0, 0, 1], 0.6666666865348816 7min 33s} 
+\\ \\ \\[1ex] 
  \hline
 \end{tabular}
 \caption{rezultati algoritama nad malim \lstinline{n}} 
 \end{widepage}
 \end{table}
 
-Treba uzeti u obzir da trenirani model za isti ulaz nece uvek vratiti isti izlaz. U slucajevima gde vise podskupova ima jako slicne performanse, ne znamo koji od njih ce nam algoritam vratiti. Da bismo se osigurali da dobijemo najmanji moguci podskup, mozemo da gledamo preciznost kao opseg, i fitnes racunamo uzimajuci velicinu skupa u obzir.
+\subsection{Diskusija rezultata}
+Primetimo da se vreme izvršavanja algoritma grube sile značajno povećava za veće  \lstinline{n}. Zaključujemo da je algoritam nemoguće koristiti da veću dimenziju ulaza. Sa druge strane, genetski algoritam se izvršava u konstantom vremenu - menjanjem broja iteracija ili veličine populacije ovo vreme će varirati, ali vidimo da je algoritam koristan i za veliko  \lstinline{n}. Slično i za simulirano kaljenje, koje se duže izvršava zbog dodatnih komputacija, ali i dalje u konstantnom vremenu.\newline
+Treba uzeti u obzir da trenirani model za isti ulaz neće uvek vratiti isti izlaz. U slučajevima gde više podskupova ima jako slične performanse, ne znamo koji od njih će nam algoritam vratiti. Da bismo se osigurali da dobijemo najmanji mogući podskup, možemo da gledamo preciznost kao opseg, i fitnes računamo uzimajuci veličinu skupa u obzir. Predstavićemo i rezultate algoritma sa izmenjenim računanjem fitnesa.\newpage
+
+\begin{table}[h]
+\centering
+\begin{tabular}{||c | c c ||} 
+ \hline
+ n & GenAlg & GenAlg (expanded fitness) \\ [0.5ex] 
+ \hline\hline
+  5 & 
+  \multirow{3}{4.0cm}{\centering [0, 0, 1, 0, 1] 0.6620689630508423 2min 58s} &	
+  \multirow{3}{4.0cm}{\centering [0, 0, 1, 0, 0] 0.634482741355896 2min 54s} 
+  \\ \\ \\ \hline
+ 10 & 
+ \multirow{3}{4.5cm}{\centering [1, 1, 1, 1, 0, 0, 0, 1, 0, 0], 0.6781609058380127 \newline 2min 40s} &	
+ \multirow{3}{4.5cm}{\centering[1, 0, 0, 0, 0, 1, 0, 1, 0, 0], 0.6505746841430664 \newline 2min 45s} 
+ \\ \\ \\ \hline
+ 20 & 
+ \multirow{4}{4.8cm}{\centering [0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1] \newline 0.7195402383804321 \newline 2min 49s} &	
+ \multirow{4}{4.8cm}{\centering [0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0] \newline 0.707011517683665 \newline 2min 57s} 
+ \\  \\ \\ \\ \hline
+\end{tabular}
+\caption{rezultati genetskog algoritma sa proširenim računanjem fitnesa} 
+\end{table}
+
+Vidimo da u nekim slučajevima možemo da dobijemo dosta manje skupove atributa koji imaju sličnu preciznost. Na primeru \lstinline{n=20} rezultat običnog i proširenog algoritma je isti (ista veličina skupa), pa možemo zaključiti da je podksup veličine 7 sigurno dobro rešenje.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{||c | c c ||} 
+ \hline
+ n & model & model + attribute set size \\ [0.5ex] 
+ \hline\hline
+ 5 & 2.11s & 1.72s
+  \\ \hline
+ 10 & 1.71s & 1.72s
+ \\  \hline
+ 20 & 1.73s & 1.75s
+ \\  \hline
+\end{tabular}
+\caption{vreme izvršavanja računanja fitnesa samo sa modelom, i sa modelom + brojem atributa za različito \lstinline{n}} 
+\end{table}
 	
 \newpage
-\section{Zakljucak}
-Ukoliko analiziramo same atribute, ne treba gledati vrednost pojedinacnih atributa, vec veze izmedju njih, odosno vrednost kombinacija atributa. \newline
-Mana predlozenog algoritma je u ceni racunanja fitnesa jedinke. Za svaku novu jedinku moramo da treniramo masinu sa novim podskupom atributa, da bismo ocenili tacnost klasifikacije nad tim podskupom. Vreme trajanja ove operacije nije zanemarljivo, i bilo bi bolje na drugi nacin oceniti fitnes. \newline
-Sad druge strane, genetski algoritam u razumljivo vreme daje rezultat koji moze da parira prilozenim rezultatima pohlepnog algoritma. Jedna varijacija algoritma bi mogla biti da ocena fitnesa jedinke bude kombinacija tacnosti klasifikacije i broja atributa, gde se prednost daje jedinkama sa manjim brojem atributa.
+\section{Zaključak}
+Ukoliko analiziramo same atribute, ne treba gledati vrednost pojedinačnih atributa, već veze između njih, odosno vrednost kombinacija atributa. \newline
+Mana predloženog algoritma je u ceni računanja fitnesa jedinke. Za svaku novu jedinku moramo da treniramo mašinu sa novim podskupom atributa, da bismo ocenili tačnost klasifikacije nad tim podskupom. Vreme trajanja ove operacije nije zanemarljivo, i bilo bi bolje na drugi način oceniti fitnes. \newline
+Sa druge strane, genetski algoritam u razumljivo vreme daje rezultat koji može da parira priloženim rezultatima pohlepnog algoritma. Jedna varijacija algoritma bi mogla biti da ocena fitnesa jedinke bude kombinacija tačnosti klasifikacije i broja atributa, gde se prednost daje jedinkama sa manjim brojem atributa.
 %\begin{figure}[h!]
 %	\centering
 %		\includegraphics[width=0.8\textwidth]{classification_print}
